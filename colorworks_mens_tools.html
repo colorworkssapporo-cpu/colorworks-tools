@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="メンズ診断">
+<title>COLORWORKS メンズスタイル診断</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--text:#1a1a1a;--text2:#666;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --rm:10px;--rl:14px;
+  --brand:#1B2880;--brand2:#00A8C0;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a1a;--bg2:#252525;--text:#f0f0f0;--text2:#999;
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22)}
+}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI',sans-serif;background:var(--bg2);color:var(--text);-webkit-text-size-adjust:100%}
+.app-shell{display:flex;flex-direction:column;height:100dvh;max-width:680px;margin:0 auto;background:var(--bg)}
+.app-header{background:var(--brand);padding:12px 16px 10px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.app-header-title{font-size:13px;font-weight:500;color:white;letter-spacing:.08em}
+.app-header-sub{font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.06em}
+.app-header-badge{font-size:10px;padding:3px 10px;border:1px solid rgba(255,255,255,.4);border-radius:20px;color:rgba(255,255,255,.85)}
+.tab-bar{display:flex;background:var(--bg);border-bottom:.5px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{flex:1;min-width:80px;padding:10px 4px 8px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text2);transition:color .15s;position:relative}
+.tab-btn .tab-icon{font-size:17px;line-height:1}
+.tab-btn .tab-label{font-size:9.5px;letter-spacing:.03em;white-space:nowrap;color:inherit}
+.tab-btn.active{color:var(--brand)}
+.tab-btn.active::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:2px;background:var(--brand);border-radius:1px}
+.content-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.5rem 1rem 2rem}
+.panel{display:none}.panel.active{display:block}
+
+/* Shared tool styles */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding-bottom:1.25rem;border-bottom:.5px solid var(--border);margin-bottom:1.75rem}
+.htitle{font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--text2)}
+.hbadge{font-size:11px;padding:3px 10px;border:.5px solid var(--border);border-radius:20px;color:var(--text2)}
+.srow{display:flex;justify-content:space-between;margin-bottom:7px}
+.slabel{font-size:12px;color:var(--text2)}
+.pbar{width:100%;height:2px;background:var(--border);border-radius:2px;margin-bottom:1.5rem}
+.pfill{height:2px;background:var(--text);border-radius:2px;transition:width .4s ease}
+.ctag{display:inline-block;font-size:11px;letter-spacing:.07em;color:var(--text2);border:.5px solid var(--border);border-radius:3px;padding:2px 8px;margin-bottom:10px}
+.qtext{font-size:15px;font-weight:500;color:var(--text);margin-bottom:5px;line-height:1.6}
+.qsub{font-size:12px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6}
+.opt{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:10px;width:100%;padding:11px 14px;margin-bottom:7px;background:var(--bg2);border:.5px solid var(--border);border-radius:var(--rm);cursor:pointer;text-align:left;transition:all .15s}
+.opt:hover{background:var(--bg);border-color:var(--border2)}
+.opt.sel{background:var(--bg);border-color:var(--text)}
+.odot{width:16px;height:16px;min-width:16px;border-radius:50%;border:1.5px solid var(--border2);margin-top:2px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.opt.sel .odot{border-color:var(--text);background:var(--text)}
+.oi{width:6px;height:6px;border-radius:50%;background:var(--bg);display:none}
+.opt.sel .oi{display:block}
+.olabel{font-size:13px;font-weight:500;color:var(--text);line-height:1.5}
+.odesc{font-size:12px;color:var(--text2);margin-top:2px}
+.navrow{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem}
+.btnp{padding:10px 26px;background:var(--text);color:var(--bg);border:none;border-radius:var(--rm);font-size:13px;cursor:pointer;letter-spacing:.04em}
+.btnp:disabled{opacity:.25;cursor:not-allowed}
+.btng{padding:10px 18px;background:transparent;border:.5px solid var(--border);border-radius:var(--rm);font-size:13px;color:var(--text2);cursor:pointer}
+.sec{font-size:11px;letter-spacing:.1em;color:var(--text2);margin:1.5rem 0 10px;padding-bottom:6px;border-bottom:.5px solid var(--border)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem}
+.tag{font-size:12px;padding:4px 12px;border:.5px solid var(--border);border-radius:20px;color:var(--text2)}
+.tag.avoid{text-decoration:line-through;opacity:.5;background:var(--bg2)}
+.cards2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.5rem}
+.card{background:var(--bg2);border-radius:var(--rm);padding:11px 13px}
+.card-k{font-size:11px;color:var(--text2);margin-bottom:4px;letter-spacing:.05em}
+.card-v{font-size:12px;color:var(--text);line-height:1.6}
+.divider{height:.5px;background:var(--border);margin:1.5rem 0}
+.color-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:.5rem}
+.cswatch{display:flex;align-items:center;gap:6px;padding:4px 11px 4px 5px;border:.5px solid var(--border);border-radius:20px}
+.cdot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+.cname{font-size:11px;color:var(--text2)}
+.mup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.5rem}
+.mup-item{background:var(--bg2);border-radius:var(--rm);padding:10px 12px}
+.mup-k{font-size:11px;color:var(--text2);margin-bottom:3px;letter-spacing:.05em}
+.mup-v{font-size:12px;color:var(--text);line-height:1.55}
+.score-row{margin-bottom:10px}
+.score-top{display:flex;justify-content:space-between;margin-bottom:4px}
+.score-lbl{font-size:12px;color:var(--text)}
+.score-num{font-size:12px;color:var(--text2)}
+.score-bg{height:5px;background:var(--border);border-radius:3px}
+.score-fill{height:5px;border-radius:3px;transition:width .7s ease}
+.hlbox{border:.5px solid var(--border);border-radius:var(--rm);padding:14px 16px;margin-top:.5rem}
+.hl-label{font-size:11px;color:var(--text2);letter-spacing:.07em;margin-bottom:6px}
+.hl-text{font-size:13px;color:var(--text);line-height:1.75}
+.cfbox{background:var(--bg2);border-radius:var(--rm);padding:12px 14px;margin:.5rem 0}
+.cf-label{font-size:11px;color:var(--text2);margin-bottom:5px}
+.cf-text{font-size:12px;color:var(--text2);line-height:1.7}
+.restart{width:100%;padding:10px;background:transparent;border:.5px solid var(--border);border-radius:var(--rm);font-size:13px;color:var(--text2);cursor:pointer;margin-top:1rem}
+.r-accent{height:3px;border-radius:1px;width:48px;margin-bottom:1.25rem}
+.r-label{font-size:11px;letter-spacing:.15em;color:var(--text2);margin-bottom:8px}
+.r-name{font-size:26px;font-weight:500;color:var(--text);letter-spacing:.04em;margin-bottom:4px}
+.r-eng{font-size:12px;color:var(--text2);letter-spacing:.12em;margin-bottom:1rem}
+.r-desc{font-size:13px;color:var(--text2);line-height:1.85;margin-bottom:1.5rem}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.cbadge{font-size:11px;padding:3px 12px;border-radius:20px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="app-header">
+    <div>
+      <div class="app-header-title">COLORWORKS メンズ診断</div>
+      <div class="app-header-sub">sapporo</div>
+    </div>
+    <div class="app-header-badge">Men's</div>
+  </div>
+  <div class="tab-bar" role="tablist">
+    <button class="tab-btn active" data-tab="kokkaku" onclick="switchTab('kokkaku')" role="tab">
+      <span class="tab-icon">📐</span><span class="tab-label">骨格診断</span>
+    </button>
+    <button class="tab-btn" data-tab="kao" onclick="switchTab('kao')" role="tab">
+      <span class="tab-icon">👤</span><span class="tab-label">顔タイプ</span>
+    </button>
+    <button class="tab-btn" data-tab="pc" onclick="switchTab('pc')" role="tab">
+      <span class="tab-icon">🎨</span><span class="tab-label">カラー診断</span>
+    </button>
+    <button class="tab-btn" data-tab="axis" onclick="switchTab('axis')" role="tab">
+      <span class="tab-icon">✨</span><span class="tab-label">3軸アドバイス</span>
+    </button>
+  </div>
+  <div class="content-area">
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PANEL 1: 骨格診断（男性版） -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="panel_kokkaku" class="panel active">
+      <div class="hdr">
+        <span class="htitle">骨格診断（メンズ）</span>
+        <span class="hbadge">Professional</span>
+      </div>
+      <div id="main_kokkaku"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PANEL 2: 顔タイプ診断（男性版） -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="panel_kao" class="panel">
+      <div class="hdr">
+        <span class="htitle">顔タイプ診断（メンズ）</span>
+        <span class="hbadge">8 Types</span>
+      </div>
+      <div id="main_kao"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PANEL 3: パーソナルカラー診断（男女共通） -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="panel_pc" class="panel">
+      <div class="hdr">
+        <span class="htitle">パーソナルカラー診断</span>
+        <span class="hbadge">1st + 2nd · 12タイプ</span>
+      </div>
+      <div id="main_pc"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- PANEL 4: 3軸アドバイザー（男性版） -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="panel_axis" class="panel">
+      <div class="hdr">
+        <span class="htitle">3軸スタイリングアドバイザー</span>
+        <span class="hbadge">メンズ · 12シーズン</span>
+      </div>
+      <div id="main_axis"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── Tab Switching ─────────────────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('active')});
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const panel=document.getElementById('panel_'+tab);
+  if(panel){panel.style.display='block';panel.classList.add('active')}
+  const btn=document.querySelector('[data-tab="'+tab+'"]');
+  if(btn)btn.classList.add('active');
+  document.querySelector('.content-area').scrollTop=0;
+}
+document.getElementById('panel_kokkaku').style.display='block';
+
+// ═══════════════════════════════════════════════════════════════
+// 1. 骨格診断（男性版）
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const Qs=[
+  {cat:"首・肩",q:"首の太さ・長さはどちらに近いですか？",sub:"正面・横から確認してください。",opts:[
+    {l:"短め・太め・筋肉質",d:"首が短く太く、がっしりした印象",t:"S"},
+    {l:"長め・細め・なで肩気味",d:"首が長く細く、肩が下がり気味",t:"W"},
+    {l:"長め・骨張っている",d:"首筋が見え、骨感がある",t:"N"}]},
+  {cat:"首・肩",q:"肩の形・幅はどちらに近いですか？",sub:"肩の張り出し・厚みを確認してください。",opts:[
+    {l:"丸みがある・厚い・いかり肩",d:"肩が丸く厚みがあり張り出している",t:"S"},
+    {l:"なで肩・薄い",d:"肩が下がり気味で薄い印象",t:"W"},
+    {l:"骨張った肩・フレームが大きい",d:"肩幅はあるが薄く骨格が目立つ",t:"N"}]},
+  {cat:"胸・体幹",q:"胸板・体幹の質感はどちらに近いですか？",sub:"上半身の厚みと質感を確認してください。",opts:[
+    {l:"厚みがある・筋肉質・ハリがある",d:"上半身が立体的でメリハリがある",t:"S"},
+    {l:"薄め・やわらかい",d:"全体的に薄く平らな印象",t:"W"},
+    {l:"骨格が目立つ・肋骨が見える",d:"骨格やフレームが前面に出る",t:"N"}]},
+  {cat:"ウエスト",q:"ウエストのラインはどちらに近いですか？",sub:"体の横から確認してください。",opts:[
+    {l:"くびれがある・高め",d:"ウエストが比較的高くしまっている",t:"S"},
+    {l:"低め・腰回りがやわらかい",d:"くびれが低く丸みがある",t:"W"},
+    {l:"ほぼ直線的",d:"くびれが少なくボックス型",t:"N"}]},
+  {cat:"下半身",q:"腰・ヒップの形はどちらに近いですか？",sub:"横から確認してください。",opts:[
+    {l:"高め・コンパクト",d:"ヒップの位置が高くコンパクト",t:"S"},
+    {l:"低め・丸みがある",d:"ヒップが低く丸みがある",t:"W"},
+    {l:"横に広い・骨盤が大きい",d:"骨盤が張り出しフレーム感がある",t:"N"}]},
+  {cat:"下半身",q:"脚の形はどちらに近いですか？",sub:"太もも〜ふくらはぎの形を確認してください。",opts:[
+    {l:"太もも前面が張っている・筋肉質",d:"前張りで筋肉質",t:"S"},
+    {l:"細め・全体的にすっきり",d:"細くスリムな脚",t:"W"},
+    {l:"膝下が長い・骨感がある",d:"スネが目立ち直線的な脚",t:"N"}]},
+  {cat:"手・腕",q:"手の質感・形はどちらに近いですか？",sub:"手の甲・指の形を確認してください。",opts:[
+    {l:"厚みがある・ハリがある",d:"弾力があり肉感のある手",t:"S"},
+    {l:"薄い・やわらかい",d:"薄くやわらかい手",t:"W"},
+    {l:"骨張っている・指が長い",d:"関節が目立ち細長い",t:"N"}]},
+  {cat:"全体",q:"全体的な体のシルエットはどちらに近いですか？",sub:"",opts:[
+    {l:"逆三角形・上半身が目立つ",d:"肩幅広く下に向かって細くなる",t:"S"},
+    {l:"全体的に細め・均一",d:"上下バランスよく細い",t:"W"},
+    {l:"長方形・フレーム感がある",d:"上下同じ幅でがっしりした骨格",t:"N"}]},
+  {cat:"全体",q:"体の重心はどちらに近いですか？",sub:"ボリュームの位置を確認してください。",opts:[
+    {l:"上半身にボリューム",d:"胸板・肩に存在感がある",t:"S"},
+    {l:"下半身にボリューム",d:"腰回り・太ももが目立つ",t:"W"},
+    {l:"全体的にフレーム感",d:"骨格が大きく上下均等",t:"N"}]},
+  {cat:"全体",q:"着こなしで感じることはどちらに近いですか？",sub:"",opts:[
+    {l:"シンプルな服が一番似合う・着太りしやすい",d:"余計なデザインが邪魔になりやすい",t:"S"},
+    {l:"大きい服が似合わない・小さく見える",d:"オーバーサイズが重く見える",t:"W"},
+    {l:"何でもそれなりに着こなせる",d:"着こなしの幅が広い",t:"N"}]},
+];
+
+const R={
+  S:{name:"ストレートタイプ",eng:"Straight",col:"#1B4B8A",scol:"#a0b8d8",
+    desc:"上半身に厚みとハリがあり、全体的にメリハリのある体型です。シンプルで上質な素材がもっともよく映えます。きちんと感のあるシャープなスタイリングが得意です。",
+    sil:["Iライン","テーパードシルエット","タイト〜レギュラーフィット"],
+    mat:["ウール","コットン（ハリあり）","シルク","カシミア"],
+    items:["テーラードジャケット","スラックス","シンプルシャツ","タートルネック","トレンチコート"],
+    avoid:["だぼっとしたシルエット","柄が多いもの","過度な装飾"],
+    collar:["レギュラーカラー","ワイドカラー","タートルネック","Vネック（浅め）"],
+    key:"シンプル・上質・テーラード"},
+  W:{name:"ウェーブタイプ",eng:"Wave",col:"#2A7A5A",scol:"#90c8a8",
+    desc:"全体的に細くやわらかい体型で、上半身にボリュームを持たせることでバランスが整います。柔らかい素材やレイヤードスタイルが似合います。",
+    sil:["ショート丈トップス","Vライン","レイヤード"],
+    mat:["やわらかいニット","シャツ（薄手）","リネン","ジャージー素材"],
+    items:["Vネックニット","ショート丈ジャケット","スキニーパンツ","チェスターコート（短め）"],
+    avoid:["オーバーサイズ","ダボッとしたボトムス","ローウエストパンツ"],
+    collar:["Vネック","スキッパーカラー","スタンドカラー（低め）","クルーネック"],
+    key:"フィット・ソフト・レイヤード"},
+  N:{name:"ナチュラルタイプ",eng:"Natural",col:"#5A4A2A",scol:"#b8a880",
+    desc:"骨格がしっかりしていてフレーム感と直線的なラインが特徴です。素材感と抜け感を活かしたラフなスタイリングが得意。こなれ感が自然と出るタイプです。",
+    sil:["オーバーサイズ","ゆったりIライン","ロングライン","ワイドシルエット"],
+    mat:["リネン","デニム","レザー","ざっくりニット","コーデュロイ"],
+    items:["ワイドパンツ","オーバーサイズシャツ","ロングコート","セットアップ（ゆったり）","ジョガーパンツ"],
+    avoid:["タイトすぎるもの","コンパクトすぎるアイテム","ピタッとしたシルエット"],
+    collar:["開襟シャツ","バンドカラー","オープンカラー","ビッグカラー"],
+    key:"ラフ・素材感・こなれ"},
+};
+
+let cur=0,ans=[],scores={S:0,W:0,N:0};
+const N_Q=Qs.length;
+
+function render(){document.getElementById('main_kokkaku').innerHTML='';cur<N_Q?renderQ():renderResult();}
+
+function renderQ(){
+  const q=Qs[cur],sel=ans[cur];
+  const pct=Math.round(cur/N_Q*100);
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div class="srow"><span class="slabel">${cur+1} / ${N_Q}</span><span class="slabel">${q.cat}</span></div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    <div class="ctag">${q.cat}</div>
+    <div class="qtext">${q.q}</div>
+    ${q.sub?`<div class="qsub">${q.sub}</div>`:''}
+    ${q.opts.map((o,i)=>`
+      <div class="opt${sel===i?' sel':''}" data-i="${i}">
+        <div class="odot"><div class="oi"></div></div>
+        <div><div class="olabel">${o.l}</div><div class="odesc">${o.d}</div></div>
+      </div>`).join('')}
+    <div class="navrow">
+      <button class="btng" id="bk_k" ${cur===0?'style="visibility:hidden"':''}>← 戻る</button>
+      <button class="btnp" id="nx_k" ${sel===undefined?'disabled':''}>
+        ${cur===N_Q-1?'診断する →':'次へ →'}
+      </button>
+    </div>`;
+  document.getElementById('main_kokkaku').appendChild(el);
+  el.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{ans[cur]=+o.dataset.i;render();}));
+  el.querySelector('#nx_k').addEventListener('click',()=>{
+    if(ans[cur]===undefined)return;
+    cur++;
+    if(cur>=N_Q){scores={S:0,W:0,N:0};ans.forEach((a,qi)=>{scores[Qs[qi].opts[a].t]++;});}
+    render();
+  });
+  const bk=el.querySelector('#bk_k');if(bk&&cur>0)bk.addEventListener('click',()=>{cur--;render();});
+}
+
+function renderResult(){
+  const top=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  const r=R[top];
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div style="padding-bottom:1.5rem;border-bottom:.5px solid var(--border);margin-bottom:1.5rem">
+      <div class="r-accent" style="background:${r.col}"></div>
+      <div class="r-label">診断結果</div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-eng">${r.eng} Type</div>
+      <div class="r-desc">${r.desc}</div>
+    </div>
+    <div class="sec">スコア内訳</div>
+    ${Object.entries(scores).map(([t,s])=>`
+      <div class="score-row">
+        <div class="score-top"><span class="score-lbl">${R[t].name}</span><span class="score-num">${s}/${N_Q}</span></div>
+        <div class="score-bg"><div class="score-fill" style="width:${Math.round(s/N_Q*100)}%;background:${R[t].scol}"></div></div>
+      </div>`).join('')}
+    <div class="divider"></div>
+    <div class="sec">似合うシルエット</div>
+    <div class="tags">${r.sil.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">似合う素材</div>
+    <div class="tags">${r.mat.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="sec">おすすめアイテム</div>
+    <div class="tags">${r.items.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">似合う衿形・ネックライン</div>
+    <div class="tags">${r.collar.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">避けたいアイテム</div>
+    <div class="tags">${r.avoid.map(v=>`<span class="tag avoid">${v}</span>`).join('')}</div>
+    <button class="restart" id="rst_k">もう一度診断する</button>`;
+  document.getElementById('main_kokkaku').appendChild(el);
+  document.getElementById('rst_k').addEventListener('click',()=>{cur=0;ans=[];scores={S:0,W:0,N:0};render();});
+}
+render();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// 2. 顔タイプ診断（男性版）
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const Qs=[
+  {cat:"顔の輪郭",q:"顔の輪郭の形はどちらに近いですか？",sub:"正面から鏡で確認してください。",opts:[
+    {l:"丸型・コンパクト",d:"顔全体が丸くベビーフェイス",a:-2,c:2},
+    {l:"卵型・丸みがある",d:"上が広く下がやや丸め",a:-1,c:1},
+    {l:"面長・縦長",d:"縦に長くシャープな印象",a:2,c:-1},
+    {l:"四角・角ばっている",d:"あごや頬骨が角張っている",a:1,c:-2}]},
+  {cat:"顔の輪郭",q:"あごのラインはどちらに近いですか？",sub:"",opts:[
+    {l:"丸くやわらかい",d:"丸みがあり柔らかな印象",a:-2,c:2},
+    {l:"なだらかに細くなる",d:"自然にシュッとしている",a:0,c:1},
+    {l:"シャープ・とがる",d:"あごがとがってシャープ",a:2,c:-1},
+    {l:"四角・フラット",d:"あごが平らで角張っている",a:1,c:-2}]},
+  {cat:"目",q:"目の大きさ・印象はどちらに近いですか？",sub:"",opts:[
+    {l:"大きくて丸い",d:"パッチリした大きな瞳",a:-2,c:2},
+    {l:"中くらい・横長",d:"大きすぎず小さすぎない",a:0,c:0},
+    {l:"切れ長・細め",d:"細くシャープな印象",a:2,c:-2},
+    {l:"奥二重・深い",d:"奥行きがあり落ち着いた印象",a:1,c:-1}]},
+  {cat:"目",q:"目尻の角度はどちらに近いですか？",sub:"目頭と目尻の高さを比べてください。",opts:[
+    {l:"たれ目気味",d:"目尻がやや下がっている",a:-1,c:2},
+    {l:"ほぼ平行",d:"目頭と目尻が同じ高さ",a:0,c:0},
+    {l:"つり目・目尻が上がる",d:"目尻がはっきり上がっている",a:2,c:-2}]},
+  {cat:"眉",q:"眉の自然な形はどちらに近いですか？",sub:"整える前の自然な眉を思い出してください。",opts:[
+    {l:"アーチがある・丸め",d:"やわらかいアーチを描く",a:-1,c:2},
+    {l:"フラット・直線的",d:"アーチがなくほぼ直線",a:2,c:-2},
+    {l:"太め・存在感がある",d:"眉が太くしっかりしている",a:1,c:-1},
+    {l:"細め・なだらか",d:"細くやわらかい眉",a:-1,c:1}]},
+  {cat:"鼻",q:"鼻の形・印象はどちらに近いですか？",sub:"",opts:[
+    {l:"小ぶり・低め",d:"コンパクトで丸みのある鼻",a:-1,c:2},
+    {l:"普通・自然",d:"大きすぎず小さすぎない",a:0,c:0},
+    {l:"高い・シャープ",d:"鼻筋が通りシャープ",a:2,c:-1},
+    {l:"横に広い・存在感がある",d:"鼻翼が広く男性的",a:1,c:-1}]},
+  {cat:"唇・口元",q:"唇の形・口元の印象はどちらに近いですか？",sub:"",opts:[
+    {l:"丸みがある・やわらかい",d:"口元がやわらかくやさしい印象",a:-1,c:2},
+    {l:"普通・バランスがよい",d:"特に目立つ特徴がない",a:0,c:0},
+    {l:"薄め・シャープ",d:"口元が引き締まっている",a:2,c:-1},
+    {l:"口角が下がりやすい",d:"クールで落ち着いた印象",a:1,c:-1}]},
+  {cat:"頬・フェイスライン",q:"頬・フェイスラインの印象はどちらに近いですか？",sub:"",opts:[
+    {l:"丸くふっくら",d:"頬が丸く柔らかい",a:-2,c:2},
+    {l:"すっきりしている",d:"フェイスラインがすっきり",a:1,c:0},
+    {l:"シャープ・骨感がある",d:"頬骨が高く骨格が目立つ",a:2,c:-1},
+    {l:"エラが張っている",d:"エラが張り男性的な輪郭",a:1,c:-2}]},
+  {cat:"全体印象",q:"初対面の人に言われることに最も近いのは？",sub:"",opts:[
+    {l:"かわいい・若く見られる・童顔",d:"実年齢より若く見える",a:-2,c:1},
+    {l:"やさしそう・穏やか",d:"親しみやすく温かい印象",a:-1,c:1},
+    {l:"かっこいい・クール",d:"シャープでスタイリッシュ",a:2,c:-1},
+    {l:"渋い・大人っぽい",d:"落ち着いた大人の印象",a:1,c:-1}]},
+  {cat:"全体印象",q:"顔全体のパーツの位置（重心）はどちらに近いですか？",sub:"",opts:[
+    {l:"下方に集まっている・額が広い",d:"目が顔の下方にある",a:-2,c:0},
+    {l:"中央バランスがよい",d:"パーツがまとまっている",a:0,c:0},
+    {l:"上方に集まっている",d:"あごが長く見える",a:2,c:0}]},
+];
+
+const T={
+  ACT:{name:"アクティブ",eng:"Active",col:"#d47f50",
+    desc:"丸みと直線が混在した個性的な顔立ち。エネルギッシュで親しみやすい印象があります。カジュアルでポップなスタイリングが自然に似合い、個性的なコーデも楽しめます。",
+    style:"カジュアル・スポーティ・ポップ",
+    items:["ストリートカジュアル","スポーツMIX","カラフルアイテム","ユニークなグラフィック"],
+    collar:["クルーネック","スタンドカラー","オープンカラー"],
+    hair:["マッシュ","ツーブロック（柔らかめ）","カラーリング"],
+    acc:"カラフルなスニーカー・キャップ・個性的な時計"},
+  FRE:{name:"フレッシュ",eng:"Fresh",col:"#5e9e90",
+    desc:"さわやかで清潔感のある顔立ち。ナチュラルで自然体な雰囲気が魅力です。シンプルなスタイリングが最もよく映え、ありのままが一番輝くタイプです。",
+    style:"シンプル・ナチュラル・カジュアル",
+    items:["シンプルTシャツ","デニム","チノパン","カジュアルシャツ","スニーカー"],
+    collar:["クルーネック","Vネック","ポロカラー","ボタンダウン"],
+    hair:["ナチュラルショート","ソフトツーブロック","シンプルスタイル"],
+    acc:"シンプルな時計・レザーバッグ・ホワイトスニーカー"},
+  CLC:{name:"クールカジュアル",eng:"Cool Casual",col:"#5a7898",
+    desc:"クールでこなれた印象のある顔立ち。ユニセックスでスタイリッシュな雰囲気が得意です。ラフに着こなすほど様になる自然なかっこよさがあります。",
+    style:"ストリート・カジュアル・ユニセックス",
+    items:["ワイドパンツ","オーバーサイズシャツ","ブルゾン","スウェット","デニムジャケット"],
+    collar:["バンドカラー","オープンカラー","クルーネック","スタンドカラー"],
+    hair:["センターパート","マッシュウルフ","ゆるめスタイル"],
+    acc:"シンプルシルバー・バックパック・キャップ・スニーカー"},
+  SFT:{name:"ソフトマスキュリン",eng:"Soft Masculine",col:"#907898",
+    desc:"やわらかさと男性らしさを兼ね備えた顔立ち。上品で穏やかな印象があります。きれいめカジュアルが最も自然に似合い、品のあるスタイリングが得意です。",
+    style:"きれいめカジュアル・ソフト・上品",
+    items:["テーラードジャケット","チノパン","ニット","きれいめシャツ","トレンチコート"],
+    collar:["レギュラーカラー","Vネック","タートルネック","ノーカラー"],
+    hair:["ソフトセンターパート","ナチュラルウェーブ","クリーンなスタイル"],
+    acc:"ゴールドorシルバー（細め）・レザーウォッチ・きれいめスニーカー"},
+  SHA:{name:"シャープ",eng:"Sharp",col:"#607890",
+    desc:"知的でシャープな印象の顔立ち。洗練されたスタイリングが自然に映えます。クラシックなアイテムやモードなスタイルが得意で、上品さと存在感があります。",
+    style:"クラシック・モード・洗練",
+    items:["スーツ","テーラードジャケット","スラックス","タートルネック","チェスターコート"],
+    collar:["ワイドカラー","タートルネック","レギュラーカラー","ノーカラー"],
+    hair:["クリーンバックスラック","サイドパート","クラシックスタイル"],
+    acc:"シルバー時計・革靴・シンプルなメタルアクセ"},
+  BOL:{name:"ボールド",eng:"Bold",col:"#506070",
+    desc:"存在感のある男性的な顔立ち。強さとかっこよさが自然と漂います。インパクトのあるスタイリングやモードなコーデが得意で、強いコントラストが似合います。",
+    style:"モード・ストリート・ハードカジュアル",
+    items:["ライダースジャケット","ブラックパンツ","オーバーサイズコート","カーゴパンツ"],
+    collar:["ハイネック","タートルネック","開襟シャツ","ビッグカラー"],
+    hair:["ツーブロック（クリア）","スキンフェード","ショートクロップ"],
+    acc:"シルバー大ぶり・チェーン・ブーツ・サングラス"},
+  NAT:{name:"ナチュラル",eng:"Natural",col:"#4a7a55",
+    desc:"自然体でこなれた印象の顔立ち。素材感とラフさが自然に似合います。ヴィンテージやアメカジ系のスタイリングが得意で、力を抜いた着こなしが魅力です。",
+    style:"アメカジ・ヴィンテージ・ナチュラル",
+    items:["デニムジャケット","フランネルシャツ","チノパン","ワークブーツ","ミリタリーアイテム"],
+    collar:["開襟シャツ","バンドカラー","ボタンダウン","クルーネック"],
+    hair:["ナチュラルテクスチャー","ゆるめパーマ","カジュアルスタイル"],
+    acc:"レザーウォッチ・ワークブーツ・キャンバストート"},
+  CLS:{name:"クラシック",eng:"Classic",col:"#3a5a3a",
+    desc:"品格と落ち着きのある顔立ち。クラシカルなスタイリングが自然に映えます。スーツや上質な素材を使ったコーデが最も似合い、時代を超えたスタイルが得意です。",
+    style:"クラシック・フォーマル・紳士的",
+    items:["スーツ","ウールコート","革靴","タイ","クラシックウォッチ"],
+    collar:["ワイドスプレッドカラー","タイ合わせ","タートルネック","Vネック"],
+    hair:["サイドパート","クラシックグルーミング","清潔感重視"],
+    acc:"革靴・機械式時計・レザーベルト・シルバーカフス"},
+};
+
+function getType(a,c){
+  if(a>=0){
+    if(c>=8) return 'SFT';
+    if(a>=12&&c<=-4) return 'BOL';
+    if(a>=8) return 'SHA';
+    return 'CLS';
+  } else {
+    if(c>=14) return 'ACT';
+    if(c>=4) return 'FRE';
+    if((-a)>=8) return 'CLC';
+    return 'NAT';
+  }
+}
+
+let cur=0,ans=[],aT=0,cT=0;
+const N_Q=Qs.length;
+
+function render(){document.getElementById('main_kao').innerHTML='';cur<N_Q?renderQ():renderResult();}
+
+function renderQ(){
+  const q=Qs[cur],sel=ans[cur];
+  const pct=Math.round(cur/N_Q*100);
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div class="srow"><span class="slabel">${cur+1} / ${N_Q}</span><span class="slabel">${q.cat}</span></div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    <div class="ctag">${q.cat}</div>
+    <div class="qtext">${q.q}</div>
+    ${q.sub?`<div class="qsub">${q.sub}</div>`:''}
+    ${q.opts.map((o,i)=>`
+      <div class="opt${sel===i?' sel':''}" data-i="${i}">
+        <div class="odot"><div class="oi"></div></div>
+        <div><div class="olabel">${o.l}</div><div class="odesc">${o.d}</div></div>
+      </div>`).join('')}
+    <div class="navrow">
+      <button class="btng" id="bk_f" ${cur===0?'style="visibility:hidden"':''}>← 戻る</button>
+      <button class="btnp" id="nx_f" ${sel===undefined?'disabled':''}>
+        ${cur===N_Q-1?'診断する →':'次へ →'}
+      </button>
+    </div>`;
+  document.getElementById('main_kao').appendChild(el);
+  el.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{ans[cur]=+o.dataset.i;render();}));
+  el.querySelector('#nx_f').addEventListener('click',()=>{
+    if(ans[cur]===undefined)return;
+    cur++;
+    if(cur>=N_Q){aT=0;cT=0;ans.forEach((a,qi)=>{aT+=Qs[qi].opts[a].a;cT+=Qs[qi].opts[a].c;});}
+    render();
+  });
+  const bk=el.querySelector('#bk_f');if(bk&&cur>0)bk.addEventListener('click',()=>{cur--;render();});
+}
+
+function renderResult(){
+  const type=getType(aT,cT);
+  const r=T[type];
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div style="padding-bottom:1.5rem;border-bottom:.5px solid var(--border);margin-bottom:1.5rem">
+      <div class="r-accent" style="background:${r.col}"></div>
+      <div class="r-label">診断結果</div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-eng">${r.eng} Type</div>
+      <div class="r-desc">${r.desc}</div>
+    </div>
+    <div class="sec">スタイルのイメージ</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">${r.style}</div>
+    <div class="sec">おすすめアイテム</div>
+    <div class="tags">${r.items.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">似合う衿形・ネックライン</div>
+    <div class="tags">${r.collar.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="sec">ヘアスタイル</div>
+    <div class="tags">${r.hair.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">アクセサリー・小物</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.7">${r.acc}</div>
+    <button class="restart" id="rst_f">もう一度診断する</button>`;
+  document.getElementById('main_kao').appendChild(el);
+  document.getElementById('rst_f').addEventListener('click',()=>{cur=0;ans=[];aT=0;cT=0;render();});
+}
+render();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// 3. パーソナルカラー診断（男女共通）
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const Qs=[
+  {cat:"肌・ベースカラー",q:"肌の色味はどちらに近いですか？",sub:"すっぴん・自然光の下で確認してください。",opts:[
+    {l:"黄みがある・オークル系",d:"肌に黄みやゴールド感がある",s:{S:2,Su:0,A:2,W:0}},
+    {l:"ピンクがかっている・白め",d:"肌にピンクや青みのある白さ",s:{S:0,Su:2,A:0,W:2}},
+    {l:"ベージュ・どちらともいえない",d:"黄みもピンクもほぼない中間",s:{S:1,Su:1,A:1,W:1}}]},
+  {cat:"肌",q:"日焼けの傾向はどちらに近いですか？",sub:"",opts:[
+    {l:"こんがりきれいに焼ける",d:"黒くなりやすく褪めにくい",s:{S:1,Su:0,A:2,W:0}},
+    {l:"赤くなりやすい・焼けにくい",d:"焼けにくく色が戻りやすい",s:{S:0,Su:2,A:0,W:1}},
+    {l:"少し焼けるが比較的明るい",d:"焼けるが黒くなりにくい",s:{S:2,Su:1,A:1,W:0}},
+    {l:"あまり焼けない",d:"日焼けしにくい",s:{S:0,Su:1,A:0,W:2}}]},
+  {cat:"血管",q:"手首の血管の色はどちらに近いですか？",sub:"手首の内側を自然光で確認してください。",opts:[
+    {l:"緑・黄緑がかって見える",d:"血管が緑っぽい",s:{S:2,Su:0,A:2,W:0}},
+    {l:"青・青紫がかって見える",d:"血管が青っぽい",s:{S:0,Su:2,A:0,W:2}},
+    {l:"どちらともいえない",d:"混在している",s:{S:1,Su:1,A:1,W:1}}]},
+  {cat:"アクセサリー",q:"似合うアクセサリーの金属は？",sub:"顔元に当てて比較してみてください。",opts:[
+    {l:"ゴールド・イエローゴールド",d:"金色が顔色を明るく見せる",s:{S:2,Su:0,A:2,W:0}},
+    {l:"シルバー・プラチナ",d:"銀色が顔色を明るく見せる",s:{S:0,Su:2,A:0,W:2}},
+    {l:"アンティークゴールド・くすみゴールド",d:"くすみ感のあるゴールドが似合う",s:{S:0,Su:0,A:2,W:1}}]},
+  {cat:"カラー",q:"似合うと感じるベーシックカラーは？",sub:"白・黒のシャツや服を試してみてください。",opts:[
+    {l:"クリームホワイト・アイボリー",d:"黄みがかった白が馴染む",s:{S:2,Su:0,A:2,W:0}},
+    {l:"純白・ブルーホワイト",d:"真っ白が顔映えする",s:{S:0,Su:1,A:0,W:2}},
+    {l:"オフホワイト・グレイッシュホワイト",d:"くすみのある白が自然",s:{S:0,Su:2,A:1,W:0}}]},
+  {cat:"カラー",q:"顔色が明るく見える色はどれに近いですか？",sub:"それぞれの色を顔に当てて確認してください。",opts:[
+    {l:"コーラル・オレンジ・イエロー系",d:"暖色の明るい色が似合う",s:{S:2,Su:0,A:1,W:0}},
+    {l:"ブルー・ラベンダー・グレー系",d:"青みのクールな色が似合う",s:{S:0,Su:2,A:0,W:1}},
+    {l:"カーキ・テラコッタ・ブラウン系",d:"くすみのある暖色が似合う",s:{S:0,Su:0,A:2,W:0}},
+    {l:"ネイビー・ボルドー・ビビッドカラー",d:"深みのある色やビビッドが似合う",s:{S:1,Su:0,A:1,W:2}}]},
+  {cat:"瞳・髪",q:"瞳の色はどちらに近いですか？",sub:"自然光の下で確認してください。",opts:[
+    {l:"明るいブラウン・赤みブラウン",d:"透明感のある明るい瞳",s:{S:2,Su:0,A:1,W:0}},
+    {l:"深みブラウン・黒茶",d:"温かみのある深みブラウン",s:{S:0,Su:0,A:2,W:1}},
+    {l:"ソフトブラック・グレーがかる",d:"やわらかく暗い瞳",s:{S:0,Su:2,A:0,W:1}},
+    {l:"黒・青みブラック",d:"くっきり黒い瞳",s:{S:0,Su:0,A:0,W:2}}]},
+  {cat:"カラートーン",q:"ビビッドカラーとくすみカラー、どちらが似合いますか？",sub:"",opts:[
+    {l:"鮮やかなビビッドカラーが映える",d:"ハッキリした色が似合う",s:{S:1,Su:0,A:0,W:2}},
+    {l:"くすみカラー・マットな色が馴染む",d:"くすんだ色が自然に似合う",s:{S:0,Su:1,A:2,W:0}},
+    {l:"明るいパステル・淡い色が似合う",d:"ライトトーンがよく映える",s:{S:2,Su:2,A:0,W:0}},
+    {l:"深みのあるダークカラーが似合う",d:"ディープな色が落ち着いて見える",s:{S:0,Su:0,A:2,W:2}}]},
+  {cat:"全体印象",q:"初対面の人に言われることは？",sub:"",opts:[
+    {l:"明るい・元気そう・フレッシュ",d:"パッと明るい印象を与える",s:{S:2,Su:0,A:0,W:0}},
+    {l:"落ち着いた・大人っぽい・渋い",d:"深みのある落ち着いた印象",s:{S:0,Su:0,A:2,W:1}},
+    {l:"クール・スタイリッシュ",d:"シャープでスタイリッシュな印象",s:{S:0,Su:1,A:0,W:2}},
+    {l:"やさしそう・穏やか",d:"やわらかく穏やかな印象",s:{S:1,Su:2,A:0,W:0}}]},
+];
+
+const RES={
+  S_A:{p:"イエベ春",s:"イエベ秋",name:"リッチスプリング",accentCol:"#d4903a",
+    desc:"明るさと深みを兼ね備えた暖かみのある春タイプ。コーラルからキャメル・ゴールドまで幅広い暖色が似合います。",
+    colors:[{n:"コーラル",c:"#e8907a"},{n:"キャメル",c:"#c89860"},{n:"ゴールド",c:"#e8c050"},{n:"テラコッタ",c:"#c07050"},{n:"アイボリー",c:"#f8f0e0"}],
+    avoid:["くすみカラー","青みのある色"],makeup:"ブラウン系・コーラル・ゴールドラメ",metal:"ゴールド"},
+  S_Su:{p:"イエベ春",s:"ブルベ夏",name:"ソフトスプリング",accentCol:"#d4a878",
+    desc:"やわらかくふんわりした明るい春タイプ。淡くやさしい暖色が得意です。",
+    colors:[{n:"ライトピーチ",c:"#f5c8b0"},{n:"ソフトコーラル",c:"#f0a090"},{n:"アイボリー",c:"#f8f0e0"},{n:"ライトキャメル",c:"#d8b880"},{n:"ミルキー",c:"#f5e8a0"}],
+    avoid:["ビビッドすぎる色","ダーク"],makeup:"ソフトコーラル・ピーチ",metal:"ゴールド・ピンクゴールド"},
+  S_W:{p:"イエベ春",s:"ブルベ冬",name:"クリアスプリング",accentCol:"#c87838",
+    desc:"鮮やかで透明感のある春タイプ。ビビッドでクリアな暖色が特に似合います。",
+    colors:[{n:"ビビッドオレンジ",c:"#f08040"},{n:"クリアイエロー",c:"#f8d820"},{n:"ウォームホワイト",c:"#fff8f0"},{n:"ブライトグリーン",c:"#80c860"},{n:"コーラルレッド",c:"#e86040"}],
+    avoid:["くすみカラー","アースカラー"],makeup:"ビビッドカラー・クリア",metal:"ゴールド"},
+  Su_S:{p:"ブルベ夏",s:"イエベ春",name:"ライトサマー",accentCol:"#8098b8",
+    desc:"明るくやわらかいクールな夏タイプ。淡いブルーやグレー系が似合います。",
+    colors:[{n:"ライトブルー",c:"#b0c8e8"},{n:"スモーキーグレー",c:"#c0c0c8"},{n:"ラベンダー",c:"#d8c8f0"},{n:"オフホワイト",c:"#f5f0f0"},{n:"ペールグリーン",c:"#c0d8c8"}],
+    avoid:["ビビッドすぎる色","アースカラー"],makeup:"ライトブルー・グレー・クリア",metal:"シルバー・ピンクゴールド"},
+  Su_A:{p:"ブルベ夏",s:"イエベ秋",name:"ミュートサマー",accentCol:"#8898a8",
+    desc:"くすみのある落ち着いた夏タイプ。スモーキーなブルーグレーが自然に似合います。",
+    colors:[{n:"スモーキーブルー",c:"#8090b0"},{n:"グレーブルー",c:"#9098a8"},{n:"ダスティグリーン",c:"#80a090"},{n:"グレー",c:"#a0a0a8"},{n:"ダスティパープル",c:"#a898c0"}],
+    avoid:["ビビッドカラー","黄みの強い色"],makeup:"スモーキー系・マット",metal:"シルバー・アンティークシルバー"},
+  Su_W:{p:"ブルベ夏",s:"ブルベ冬",name:"クリアサマー",accentCol:"#6070a0",
+    desc:"澄んだクリアなクールの夏タイプ。ネイビーやグレーなど澄んだクールカラーが映えます。",
+    colors:[{n:"ネイビー",c:"#304880"},{n:"クールグレー",c:"#a8a8b8"},{n:"ラベンダー",c:"#c0a8e0"},{n:"ホワイト",c:"#f8f8fc"},{n:"スモーキーブルー",c:"#8090b0"}],
+    avoid:["アースカラー","黄みカラー"],makeup:"クリアブルー・グレー系",metal:"シルバー・プラチナ"},
+  A_S:{p:"イエベ秋",s:"イエベ春",name:"ライトオータム",accentCol:"#b08840",
+    desc:"明るめのやわらかい秋タイプ。温かみのあるベージュやキャメルが得意です。",
+    colors:[{n:"ベージュ",c:"#d8b890"},{n:"ライトキャメル",c:"#d0a870"},{n:"ウォームアイボリー",c:"#f5ead8"},{n:"テラコッタ",c:"#c89070"},{n:"モス",c:"#b8a870"}],
+    avoid:["青みカラー","ダーク"],makeup:"ウォームブラウン・ゴールド",metal:"ゴールド"},
+  A_Su:{p:"イエベ秋",s:"ブルベ夏",name:"ソフトオータム",accentCol:"#908050",
+    desc:"くすみのある落ち着いた秋タイプ。オリーブやブラウンなどのアースカラーが自然に似合います。",
+    colors:[{n:"オリーブ",c:"#808040"},{n:"テラコッタ",c:"#b87860"},{n:"ブラウン",c:"#a08060"},{n:"カーキ",c:"#909060"},{n:"モスグリーン",c:"#888850"}],
+    avoid:["ビビッドカラー","青みの強い色"],makeup:"テラコッタ・マットブラウン",metal:"マットゴールド"},
+  A_W:{p:"イエベ秋",s:"ブルベ冬",name:"ディープオータム",accentCol:"#805030",
+    desc:"深みのあるリッチな秋タイプ。バーガンディやダークブラウンなど濃厚な色が映えます。",
+    colors:[{n:"バーガンディ",c:"#903040"},{n:"フォレスト",c:"#405030"},{n:"チョコレート",c:"#604030"},{n:"ダークオリーブ",c:"#606030"},{n:"マホガニー",c:"#784030"}],
+    avoid:["パステル","青みのある色"],makeup:"ディープブラウン・バーガンディ",metal:"アンティークゴールド"},
+  W_S:{p:"ブルベ冬",s:"イエベ春",name:"クリアウィンター",accentCol:"#5060a0",
+    desc:"鮮やかで透明感のある冬タイプ。ビビッドなブルーや強いコントラストが特に似合います。",
+    colors:[{n:"ロイヤルブルー",c:"#4060c0"},{n:"ホワイト",c:"#f8f8f8"},{n:"レッド",c:"#e83040"},{n:"ネイビー",c:"#202860"},{n:"グリーン",c:"#206040"}],
+    avoid:["アースカラー","くすみカラー"],makeup:"クリアカラー・ビビッド",metal:"シルバー・プラチナ"},
+  W_Su:{p:"ブルベ冬",s:"ブルベ夏",name:"クールウィンター",accentCol:"#404878",
+    desc:"クールでクリアな冬タイプ。ネイビーやチャコールなど深みのあるクールカラーが映えます。",
+    colors:[{n:"ネイビー",c:"#2840a0"},{n:"チャコール",c:"#404850"},{n:"グレー",c:"#707880"},{n:"バーガンディ",c:"#800830"},{n:"ブラック",c:"#202028"}],
+    avoid:["アースカラー","黄みカラー"],makeup:"スモーキー・グレー・ネイビー",metal:"シルバー・プラチナ"},
+  W_A:{p:"ブルベ冬",s:"イエベ秋",name:"ダークウィンター",accentCol:"#304058",
+    desc:"深みのある重厚な冬タイプ。ダークネイビーやディープバーガンディなど重厚な色が似合います。",
+    colors:[{n:"ディープネイビー",c:"#182040"},{n:"ダークワイン",c:"#601030"},{n:"チャコール",c:"#303838"},{n:"ダークフォレスト",c:"#1a3020"},{n:"プラム",c:"#601848"}],
+    avoid:["パステル","ライトカラー"],makeup:"ダーク系・スモーキー",metal:"シルバー・ガンメタル"},
+};
+
+const SNAME={S:"イエベ春",Su:"ブルベ夏",A:"イエベ秋",W:"ブルベ冬"};
+const SCOL={S:"#d4903a",Su:"#7898b8",A:"#b08840",W:"#404878"};
+
+let cur=0,ans=[],scores={S:0,Su:0,A:0,W:0};
+const N_Q=Qs.length;
+
+function render(){document.getElementById('main_pc').innerHTML='';cur<N_Q?renderQ():renderResult();}
+
+function renderQ(){
+  const q=Qs[cur],sel=ans[cur];
+  const pct=Math.round(cur/N_Q*100);
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div class="srow"><span class="slabel">${cur+1} / ${N_Q}</span><span class="slabel">${q.cat}</span></div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    <div class="ctag">${q.cat}</div>
+    <div class="qtext">${q.q}</div>
+    ${q.sub?`<div class="qsub">${q.sub}</div>`:''}
+    ${q.opts.map((o,i)=>`
+      <div class="opt${sel===i?' sel':''}" data-i="${i}">
+        <div class="odot"><div class="oi"></div></div>
+        <div><div class="olabel">${o.l}</div><div class="odesc">${o.d}</div></div>
+      </div>`).join('')}
+    <div class="navrow">
+      <button class="btng" id="bk_p" ${cur===0?'style="visibility:hidden"':''}>← 戻る</button>
+      <button class="btnp" id="nx_p" ${sel===undefined?'disabled':''}>
+        ${cur===N_Q-1?'診断する →':'次へ →'}
+      </button>
+    </div>`;
+  document.getElementById('main_pc').appendChild(el);
+  el.querySelectorAll('.opt').forEach(o=>o.addEventListener('click',()=>{ans[cur]=+o.dataset.i;render();}));
+  el.querySelector('#nx_p').addEventListener('click',()=>{
+    if(ans[cur]===undefined)return;
+    cur++;
+    if(cur>=N_Q){
+      scores={S:0,Su:0,A:0,W:0};
+      ans.forEach((a,qi)=>{const s=Qs[qi].opts[a].s;Object.keys(s).forEach(k=>{scores[k]+=s[k];});});
+    }
+    render();
+  });
+  const bk=el.querySelector('#bk_p');if(bk&&cur>0)bk.addEventListener('click',()=>{cur--;render();});
+}
+
+function renderResult(){
+  const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const p=sorted[0][0],s=sorted[1][0];
+  const key=`${p}_${s}`;
+  const r=RES[key]||RES['S_A'];
+  const maxScore=sorted[0][1];
+  const el=document.createElement('div');
+  el.innerHTML=`
+    <div style="padding-bottom:1.5rem;border-bottom:.5px solid var(--border);margin-bottom:1.5rem">
+      <div class="r-accent" style="background:${r.accentCol}"></div>
+      <div class="r-label">診断結果</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:12px;padding:3px 12px;border-radius:20px;background:${SCOL[p]}22;color:${SCOL[p]};font-weight:500">1st ${SNAME[p]}</span>
+        <span style="font-size:11px;color:var(--text2)">×</span>
+        <span style="font-size:12px;padding:3px 12px;border-radius:20px;background:${SCOL[s]}22;color:${SCOL[s]}">2nd ${SNAME[s]}</span>
+      </div>
+      <div class="r-name">${r.name}</div>
+      <div class="r-desc">${r.desc}</div>
+    </div>
+    <div class="sec">シーズンスコア</div>
+    ${sorted.map(([t,sc])=>`
+      <div class="score-row">
+        <div class="score-top"><span class="score-lbl">${SNAME[t]}</span><span class="score-num">${sc}pt</span></div>
+        <div class="score-bg"><div class="score-fill" style="width:${Math.round(sc/maxScore*100)}%;background:${SCOL[t]}"></div></div>
+      </div>`).join('')}
+    <div class="divider"></div>
+    <div class="sec">似合うカラーパレット</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${r.avoid.map(a=>`避けたい：${a}`).join('　')}</div>
+    <div class="color-row">${r.colors.map(c=>`<div class="cswatch"><div class="cdot" style="background:${c.c}"></div><span class="cname">${c.n}</span></div>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="mup-grid">
+      <div class="mup-item"><div class="mup-k">カラーアドバイス</div><div class="mup-v">${r.makeup}</div></div>
+      <div class="mup-item"><div class="mup-k">似合う金属</div><div class="mup-v">${r.metal}</div></div>
+    </div>
+    <button class="restart" id="rst_p">もう一度診断する</button>`;
+  document.getElementById('main_pc').appendChild(el);
+  document.getElementById('rst_p').addEventListener('click',()=>{cur=0;ans=[];scores={S:0,Su:0,A:0,W:0};render();});
+}
+render();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+// 4. 3軸アドバイザー（男性版）
+// ═══════════════════════════════════════════════════════════════
+(function(){
+const KK={
+  S:{name:"ストレート",col:"#1B4B8A",bcol:"#e8eef8",
+    sil:["Iライン","テーパード","レギュラーフィット"],
+    mat:["ウール","ハリのあるコットン","シルク"],
+    items:["テーラードジャケット","スラックス","シンプルシャツ","トレンチコート"],
+    avoid:["だぼっとしたシルエット","過度な装飾","柄が多いもの"]},
+  W:{name:"ウェーブ",col:"#2A7A5A",bcol:"#e8f4ee",
+    sil:["ショート丈","Vライン","レイヤード"],
+    mat:["やわらかいニット","薄手シャツ","リネン"],
+    items:["Vネックニット","ショート丈ジャケット","スキニーパンツ","チェスターコート"],
+    avoid:["オーバーサイズ","ダボッとしたボトムス","ローウエスト"]},
+  N:{name:"ナチュラル",col:"#5A4A2A",bcol:"#f4f0e8",
+    sil:["オーバーサイズ","ワイド","ロングライン"],
+    mat:["リネン","デニム","レザー","ざっくりニット"],
+    items:["ワイドパンツ","オーバーサイズシャツ","ロングコート","セットアップ"],
+    avoid:["タイトすぎる","コンパクトすぎる","ピタッとしたシルエット"]}
+};
+
+const KA={
+  ACT:{name:"アクティブ",col:"#d47f50",bcol:"#fdf0e8",collar:["クルーネック","スタンドカラー","オープンカラー"],acc:"カラフルスニーカー・キャップ",style:"カジュアル・スポーティ"},
+  FRE:{name:"フレッシュ",col:"#5e9e90",bcol:"#edf6f4",collar:["クルーネック","Vネック","ボタンダウン"],acc:"シンプル時計・ホワイトスニーカー",style:"シンプル・ナチュラル"},
+  CLC:{name:"クールカジュアル",col:"#5a7898",bcol:"#ecf0f5",collar:["バンドカラー","オープンカラー","クルーネック"],acc:"シンプルシルバー・バックパック",style:"ストリート・カジュアル"},
+  SFT:{name:"ソフトマスキュリン",col:"#907898",bcol:"#f4eff4",collar:["レギュラーカラー","Vネック","タートルネック"],acc:"細めゴールドorシルバー・革靴",style:"きれいめカジュアル"},
+  SHA:{name:"シャープ",col:"#607890",bcol:"#ecf1f6",collar:["ワイドカラー","タートルネック","ノーカラー"],acc:"シルバー時計・革靴",style:"クラシック・モード"},
+  BOL:{name:"ボールド",col:"#506070",bcol:"#eaeff4",collar:["ハイネック","タートルネック","オープンカラー"],acc:"シルバー大ぶり・ブーツ",style:"モード・ストリート"},
+  NAT:{name:"ナチュラル",col:"#4a7a55",bcol:"#edf5ef",collar:["開襟シャツ","バンドカラー","ボタンダウン"],acc:"レザーウォッチ・ワークブーツ",style:"アメカジ・ヴィンテージ"},
+  CLS:{name:"クラシック",col:"#3a5a3a",bcol:"#edf5ed",collar:["ワイドスプレッド","レギュラーカラー","Vネック"],acc:"革靴・機械式時計",style:"クラシック・フォーマル"},
+};
+
+const PC={
+  S_A:{name:"リッチスプリング",p:"イエベ春",s:"イエベ秋",col:"#b08030",bcol:"#fdf8ec",colors:[{n:"キャメル",c:"#c89860"},{n:"コーラル",c:"#e8907a"},{n:"テラコッタ",c:"#c07050"},{n:"ゴールド",c:"#e8c050"},{n:"アイボリー",c:"#f8f0e0"}],avoid:["くすみ","青み"],mat:"暖かみのある素材・自然な発色",metal:"ゴールド"},
+  S_Su:{name:"ソフトスプリング",p:"イエベ春",s:"ブルベ夏",col:"#c09060",bcol:"#fdf8f0",colors:[{n:"ピーチ",c:"#f0b090"},{n:"アイボリー",c:"#f8f0e0"},{n:"ライトキャメル",c:"#d8b880"},{n:"ソフトコーラル",c:"#f0a090"},{n:"ミルキー",c:"#f5e8a0"}],avoid:["ダーク","ビビッド"],mat:"やわらかく明るい素材",metal:"ゴールド・ピンクゴールド"},
+  S_W:{name:"クリアスプリング",p:"イエベ春",s:"ブルベ冬",col:"#c07838",bcol:"#fdf4ec",colors:[{n:"オレンジ",c:"#f08040"},{n:"イエロー",c:"#f8d820"},{n:"ホワイト",c:"#fff8f0"},{n:"グリーン",c:"#80c860"},{n:"コーラルレッド",c:"#e86040"}],avoid:["くすみ","アースカラー"],mat:"鮮やかでクリアな素材",metal:"ゴールド"},
+  Su_S:{name:"ライトサマー",p:"ブルベ夏",s:"イエベ春",col:"#6080a0",bcol:"#edf1f8",colors:[{n:"ライトブルー",c:"#b0c8e8"},{n:"グレー",c:"#c0c0c8"},{n:"ラベンダー",c:"#d8c8f0"},{n:"オフホワイト",c:"#f5f0f0"},{n:"スモーキー",c:"#a8b8c8"}],avoid:["ビビッド","アースカラー"],mat:"明るくやわらかい素材",metal:"シルバー"},
+  Su_A:{name:"ミュートサマー",p:"ブルベ夏",s:"イエベ秋",col:"#7888a0",bcol:"#edf1f5",colors:[{n:"スモーキーブルー",c:"#8090b0"},{n:"グレーブルー",c:"#9098a8"},{n:"ダスティグリーン",c:"#80a090"},{n:"グレー",c:"#a0a0a8"},{n:"くすみネイビー",c:"#607090"}],avoid:["ビビッド","黄み"],mat:"マットでやわらかい素材",metal:"シルバー・アンティーク"},
+  Su_W:{name:"クリアサマー",p:"ブルベ夏",s:"ブルベ冬",col:"#5068a0",bcol:"#eceff8",colors:[{n:"ネイビー",c:"#304880"},{n:"グレー",c:"#a8a8b8"},{n:"ラベンダー",c:"#c0a8e0"},{n:"ホワイト",c:"#f8f8fc"},{n:"スモーキーブルー",c:"#8090b0"}],avoid:["アースカラー","黄み"],mat:"クリアで上質な素材",metal:"シルバー・プラチナ"},
+  A_S:{name:"ライトオータム",p:"イエベ秋",s:"イエベ春",col:"#a08040",bcol:"#f8f4ec",colors:[{n:"ベージュ",c:"#d8b890"},{n:"キャメル",c:"#d0a870"},{n:"アイボリー",c:"#f5ead8"},{n:"テラコッタ",c:"#c89070"},{n:"モス",c:"#b8a870"}],avoid:["青み","ダーク"],mat:"ナチュラルで明るい素材",metal:"ゴールド"},
+  A_Su:{name:"ソフトオータム",p:"イエベ秋",s:"ブルベ夏",col:"#808050",bcol:"#f5f0e8",colors:[{n:"オリーブ",c:"#808040"},{n:"テラコッタ",c:"#b87860"},{n:"ブラウン",c:"#a08060"},{n:"カーキ",c:"#909060"},{n:"モスグリーン",c:"#888850"}],avoid:["ビビッド","青み"],mat:"マットでナチュラルな素材",metal:"マットゴールド"},
+  A_W:{name:"ディープオータム",p:"イエベ秋",s:"ブルベ冬",col:"#784830",bcol:"#f5eee8",colors:[{n:"バーガンディ",c:"#903040"},{n:"フォレスト",c:"#405030"},{n:"チョコレート",c:"#604030"},{n:"ダークカーキ",c:"#606030"},{n:"マホガニー",c:"#784030"}],avoid:["パステル","青み"],mat:"深みのある重厚な素材",metal:"アンティークゴールド"},
+  W_S:{name:"クリアウィンター",p:"ブルベ冬",s:"イエベ春",col:"#4858a0",bcol:"#eceff8",colors:[{n:"ロイヤルブルー",c:"#4060c0"},{n:"ホワイト",c:"#f8f8f8"},{n:"レッド",c:"#e83040"},{n:"ネイビー",c:"#202860"},{n:"ビビッドグリーン",c:"#206040"}],avoid:["アースカラー","くすみ"],mat:"クリアでシャープな素材",metal:"シルバー・プラチナ"},
+  W_Su:{name:"クールウィンター",p:"ブルベ冬",s:"ブルベ夏",col:"#384878",bcol:"#eceff8",colors:[{n:"ネイビー",c:"#2840a0"},{n:"チャコール",c:"#404850"},{n:"グレー",c:"#707880"},{n:"バーガンディ",c:"#800830"},{n:"ブラック",c:"#202028"}],avoid:["アースカラー","黄み"],mat:"クールでシャープな素材",metal:"シルバー・プラチナ"},
+  W_A:{name:"ダークウィンター",p:"ブルベ冬",s:"イエベ秋",col:"#283850",bcol:"#eceef4",colors:[{n:"ディープネイビー",c:"#182040"},{n:"ダークワイン",c:"#601030"},{n:"チャコール",c:"#303838"},{n:"フォレスト",c:"#1a3020"},{n:"プラム",c:"#601848"}],avoid:["パステル","ライト"],mat:"深みのある重厚な素材",metal:"シルバー・ガンメタル"},
+};
+
+function synthesize(k,f,p){
+  const kd=KK[k],fd=KA[f],pd=PC[p];
+  const summary=(()=>{
+    if(k==='S'&&['SHA','CLS','SFT'].includes(f))return`${pd.name}の色味を活かした、洗練されたシャープなスタイル。${pd.mat}とシンプルなラインで3軸の良さが際立ちます。`;
+    if(k==='S'&&['ACT','FRE'].includes(f))return`${pd.name}のカラーで彩りながら、ストレートの直線ラインを意識したクリーンなスタイル。トップスにポイントを、全体はすっきりまとめて。`;
+    if(k==='W'&&['SFT','SHA','CLS'].includes(f))return`${pd.name}のカラーを活かした、フィット感と上品さが際立つきれいめスタイル。ショート丈アイテムで顔周りにボリュームを持たせて。`;
+    if(k==='W'&&['BOL','CLC'].includes(f))return`${pd.name}の色でクールさを保ちながら、ウェーブのフィット感を活かすスタイル。コンパクトなアイテム選びでスタイリッシュに。`;
+    if(k==='N'&&['BOL','CLC','NAT'].includes(f))return`${pd.name}のカラーで素材感・フレーム感を活かした、こなれたラフスタイル。${pd.mat}でナチュラルの魅力が引き立ちます。`;
+    if(k==='N'&&['SHA','CLS','SFT'].includes(f))return`${pd.name}の上品なカラーに、ナチュラルの素材感・ボリューム感を掛け合わせた「こなれエレガント」スタイル。大きめシルエットの中に品を忍ばせて。`;
+    return`${pd.name}の色味を活かしながら、${kd.name}の骨格ラインと${fd.name}の顔印象を融合させたあなただけのスタイル。`;
+  })();
+  const conflict=(()=>{
+    if(k==='S'&&['ACT','BOL'].includes(f))return`骨格ストレートはシンプル・ハリ素材が得意ですが、顔タイプは個性的なデザインが映えます。インナーやアクセで個性を出しつつ、アウターはシンプルにまとめるとバランス◎`;
+    if(k==='W'&&['BOL','CLC'].includes(f))return`ウェーブはフィット感・コンパクトが得意ですが、顔タイプはクールでラフな雰囲気。コンパクトなシルエットをベースに、色・素材でクール感を表現するとGOOD。`;
+    if(k==='N'&&['SFT','CLS'].includes(f))return`ナチュラルはラフ・大きめが得意ですが、顔タイプはきれいめな雰囲気。大きめシルエットを選びながら、${pd.name}の上品なカラーで品を出すとバランスが取れます。`;
+    return null;
+  })();
+  return{summary,conflict,silhouette:kd.sil,material:kd.mat,avoid:kd.avoid,
+    colors:pd.colors,colorBase:pd.mat,avoidColor:pd.avoid,
+    collar:fd.collar,style:fd.style,acc:fd.acc,
+    metal:pd.metal,items:kd.items};
+}
+
+let sel={k:null,f:null,p:null},showing=false;
+
+function renderSelector(){
+  const allSet=sel.k&&sel.f&&sel.p;
+  document.getElementById('main_axis').innerHTML=`
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.7">
+      3つの診断結果を選択すると、あなただけのスタイリングレポートが生成されます。
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem">
+      ${[
+        {id:'sk',label:'AXIS 01 骨格タイプ',opts:[['','選択'],['S','ストレート'],['W','ウェーブ'],['N','ナチュラル']]},
+        {id:'sf',label:'AXIS 02 顔タイプ',opts:[['','選択'],['ACT','アクティブ'],['FRE','フレッシュ'],['CLC','クールカジュアル'],['SFT','ソフトマスキュリン'],['SHA','シャープ'],['BOL','ボールド'],['NAT','ナチュラル'],['CLS','クラシック']]},
+        {id:'sp',label:'AXIS 03 カラー',opts:[['','選択'],['S_A','春×秋'],['S_Su','春×夏'],['S_W','春×冬'],['Su_S','夏×春'],['Su_A','夏×秋'],['Su_W','夏×冬'],['A_S','秋×春'],['A_Su','秋×夏'],['A_W','秋×冬'],['W_S','冬×春'],['W_Su','冬×夏'],['W_A','冬×秋']]},
+      ].map(({id,label,opts})=>`
+        <div style="border:.5px solid var(--border);border-radius:14px;padding:12px 10px">
+          <div style="font-size:10px;letter-spacing:.1em;color:var(--text2);margin-bottom:4px">${label.split(' ')[0]}</div>
+          <div style="font-size:11px;font-weight:500;color:var(--text);margin-bottom:8px">${label.split(' ').slice(1).join(' ')}</div>
+          <select id="${id}" style="width:100%;padding:7px 8px;background:var(--bg2);border:.5px solid var(--border);border-radius:10px;font-size:11px;color:var(--text);-webkit-appearance:none">
+            ${opts.map(([v,l])=>`<option value="${v}"${(id==='sk'?sel.k:id==='sf'?sel.f:sel.p)===v?' selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>`).join('')}
+    </div>
+    <button style="width:100%;padding:11px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:13px;cursor:pointer;letter-spacing:.06em;margin-bottom:1.5rem;opacity:${allSet?1:.25}" id="runbtn" ${allSet?'':'disabled'}>
+      スタイリングレポートを生成する
+    </button>
+    ${showing?'<button style="width:100%;padding:10px;background:transparent;border:.5px solid var(--border);border-radius:10px;font-size:13px;color:var(--text2);cursor:pointer" id="resetbtn">レポートを閉じる</button>':''}
+    <div id="report_axis"></div>`;
+
+  document.getElementById('sk').addEventListener('change',e=>{sel.k=e.target.value||null;renderSelector();});
+  document.getElementById('sf').addEventListener('change',e=>{sel.f=e.target.value||null;renderSelector();});
+  document.getElementById('sp').addEventListener('change',e=>{sel.p=e.target.value||null;renderSelector();});
+  document.getElementById('runbtn').addEventListener('click',()=>{
+    if(!sel.k||!sel.f||!sel.p)return;
+    showing=true;renderSelector();renderReport();
+  });
+  if(showing){
+    const rb=document.getElementById('resetbtn');
+    if(rb)rb.addEventListener('click',()=>{showing=false;renderSelector();});
+    if(sel.k&&sel.f&&sel.p)renderReport();
+  }
+}
+
+function renderReport(){
+  const d=synthesize(sel.k,sel.f,sel.p);
+  const kd=KK[sel.k],fd=KA[sel.f],pd=PC[sel.p];
+  document.getElementById('report_axis').innerHTML=`
+    <div class="divider"></div>
+    <div style="margin-bottom:1.5rem">
+      <div class="badges">
+        <span class="cbadge" style="background:${kd.bcol};color:${kd.col}">${kd.name}</span>
+        <span class="cbadge" style="background:${fd.bcol};color:${fd.col}">${fd.name}</span>
+        <span class="cbadge" style="background:${pd.bcol};color:${pd.col}">${pd.p}×${pd.s.replace('イエベ','').replace('ブルベ','')}</span>
+        <span class="cbadge" style="background:${pd.bcol};color:${pd.col};font-weight:500">${pd.name}</span>
+      </div>
+      <div style="font-size:19px;font-weight:500;color:var(--text);margin-bottom:8px">あなたのスタイルプロフィール</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.85">${d.summary}</div>
+    </div>
+    ${d.conflict?`<div class="cfbox"><div class="cf-label">3軸のバランスについて</div><div class="cf-text">${d.conflict}</div></div>`:''}
+    <div class="sec">シルエット・ライン</div>
+    <div class="tags">${d.silhouette.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+    <div class="sec">素材・テクスチャー</div>
+    <div class="tags">${d.material.map(m=>`<span class="tag">${m}</span>`).join('')}</div>
+    <div class="sec">避けたいアイテム</div>
+    <div class="tags">${d.avoid.map(a=>`<span class="tag avoid">${a}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="sec">似合うカラーパレット</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">${d.colorBase}</div>
+    <div class="color-row">${d.colors.map(c=>`<div class="cswatch"><div class="cdot" style="background:${c.c}"></div><span class="cname">${c.n}</span></div>`).join('')}</div>
+    <div style="margin-top:8px"><div class="tags">${d.avoidColor.map(a=>`<span class="tag avoid">${a}</span>`).join('')}</div></div>
+    <div class="divider"></div>
+    <div class="sec">似合う衿形・ネックライン</div>
+    <div class="tags">${d.collar.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
+    <div class="sec">おすすめアイテム</div>
+    <div class="tags">${d.items.map(i=>`<span class="tag">${i}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="cards2">
+      <div class="card"><div class="card-k">似合う金属</div><div class="card-v">${d.metal}</div></div>
+      <div class="card"><div class="card-k">アクセサリー</div><div class="card-v">${d.acc}</div></div>
+    </div>
+    <div class="hlbox">
+      <div class="hl-label">スタイリストメモ</div>
+      <div class="hl-text">${d.summary}</div>
+    </div>`;
+}
+
+renderSelector();
+})();
+</script>
+</body>
+</html>
