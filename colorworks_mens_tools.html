@@ -236,24 +236,33 @@ const R={
     sil:["Iライン","テーパードシルエット","タイト〜レギュラーフィット"],
     mat:["ウール","コットン（ハリあり）","シルク","カシミア"],
     items:["テーラードジャケット","スラックス","シンプルシャツ","タートルネック","トレンチコート"],
-    avoid:["だぼっとしたシルエット","柄が多いもの","過度な装飾"],
-    collar:["レギュラーカラー","ワイドカラー","タートルネック","Vネック（浅め）"],
+    avoid:["だぼっとしたシルエット","ゆるすぎるシルエット","小さいドット柄・細かい総柄"],
+    collar:["Vネック（浅め）","レギュラーカラー","ワイドカラー","テーラードカラー","シャツ第2ボタン開け"],
+    avoidCollar:["詰まったクルーネック","ぴったりハイネック","ボートネック"],
+    pattern:["縦ストライプ（太め）","大柄チェック","コントラスト強め","シンプルロゴ"],
+    avoidPattern:["小さいドット","細かい総柄","コントラストの弱い柄"],
     key:"シンプル・上質・テーラード"},
   W:{name:"ウェーブタイプ",eng:"Wave",col:"#2A7A5A",scol:"#90c8a8",
     desc:"全体的に細くやわらかい体型で、上半身にボリュームを持たせることでバランスが整います。柔らかい素材やレイヤードスタイルが似合います。",
     sil:["ショート丈トップス","Vライン","レイヤード"],
     mat:["やわらかいニット","シャツ（薄手）","リネン","ジャージー素材"],
     items:["Vネックニット","ショート丈ジャケット","スキニーパンツ","チェスターコート（短め）"],
-    avoid:["オーバーサイズ","ダボッとしたボトムス","ローウエストパンツ"],
-    collar:["Vネック","スキッパーカラー","スタンドカラー（低め）","クルーネック"],
+    avoid:["オーバーサイズトップス","ダボッとしたシルエット","大きく開いたネックライン"],
+    collar:["クルーネック（フィット）","Vネック（浅め）","スタンドカラー","スキッパーカラー","モックネック"],
+    avoidCollar:["大きく開いたVネック","オープンカラー（大きめ）","ダボッとしたタートル"],
+    pattern:["細かいチェック","細いストライプ","小さいドット","ペイズリー"],
+    avoidPattern:["大柄","コントラストが強すぎる柄","太いボーダー"],
     key:"フィット・ソフト・レイヤード"},
   N:{name:"ナチュラルタイプ",eng:"Natural",col:"#5A4A2A",scol:"#b8a880",
     desc:"骨格がしっかりしていてフレーム感と直線的なラインが特徴です。素材感と抜け感を活かしたラフなスタイリングが得意。こなれ感が自然と出るタイプです。",
     sil:["オーバーサイズ","ゆったりIライン","ロングライン","ワイドシルエット"],
     mat:["リネン","デニム","レザー","ざっくりニット","コーデュロイ"],
     items:["ワイドパンツ","オーバーサイズシャツ","ロングコート","セットアップ（ゆったり）","ジョガーパンツ"],
-    avoid:["タイトすぎるもの","コンパクトすぎるアイテム","ピタッとしたシルエット"],
-    collar:["開襟シャツ","バンドカラー","オープンカラー","ビッグカラー"],
+    avoid:["タイトすぎるもの","深いVネック（鎖骨強調）","ピタッとしたシルエット"],
+    collar:["ボートネック","タートルネック（ゆったり）","オフタートル","開襟シャツ（バンドカラー）","クルーネック（ゆったり）"],
+    avoidCollar:["深いVネック（鎖骨・肩幅が目立つ）","ぴったりタートル","スリムフィットクルーネック"],
+    pattern:["大柄チェック","民族柄","ボタニカル（大きめ）","迷彩","太いストライプ"],
+    avoidPattern:["小花柄","細かい総柄","コントラストの弱い柄"],
     key:"ラフ・素材感・こなれ"},
 };
 
@@ -322,6 +331,14 @@ function renderResult(){
     <div class="tags">${r.items.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
     <div class="sec">似合う衿形・ネックライン</div>
     <div class="tags">${r.collar.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">避けたい衿形</div>
+    <div class="tags">${r.avoidCollar.map(v=>`<span class="tag avoid">${v}</span>`).join('')}</div>
+    <div class="divider"></div>
+    <div class="sec">似合う柄</div>
+    <div class="tags">${r.pattern.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">避けたい柄</div>
+    <div class="tags">${r.avoidPattern.map(v=>`<span class="tag avoid">${v}</span>`).join('')}</div>
+    <div class="divider"></div>
     <div class="sec">避けたいアイテム</div>
     <div class="tags">${r.avoid.map(v=>`<span class="tag avoid">${v}</span>`).join('')}</div>
     <button class="restart" id="rst_k">もう一度診断する</button>`;
@@ -718,17 +735,29 @@ const KK={
     sil:["Iライン","テーパード","レギュラーフィット"],
     mat:["ウール","ハリのあるコットン","シルク"],
     items:["テーラードジャケット","スラックス","シンプルシャツ","トレンチコート"],
-    avoid:["だぼっとしたシルエット","過度な装飾","柄が多いもの"]},
+    avoid:["だぼっとしたシルエット","ゆるすぎるシルエット","詰まったクルーネック"],
+    necklines:["Vネック（浅め）","レギュラーカラー","ワイドカラー","テーラードカラー","シャツ第2ボタン開け"],
+    avoidNeck:["詰まったクルーネック","ぴったりハイネック","ボートネック"],
+    pattern:["縦ストライプ（太め）","大柄チェック","コントラスト強め","シンプルロゴ"],
+    avoidPattern:["小さいドット","細かい総柄","コントラストの弱い柄"]},
   W:{name:"ウェーブ",col:"#2A7A5A",bcol:"#e8f4ee",
     sil:["ショート丈","Vライン","レイヤード"],
     mat:["やわらかいニット","薄手シャツ","リネン"],
     items:["Vネックニット","ショート丈ジャケット","スキニーパンツ","チェスターコート"],
-    avoid:["オーバーサイズ","ダボッとしたボトムス","ローウエスト"]},
+    avoid:["オーバーサイズトップス","ダボッとしたシルエット","大きく開いたネックライン"],
+    necklines:["クルーネック（フィット）","Vネック（浅め）","スタンドカラー","スキッパーカラー","モックネック"],
+    avoidNeck:["大きく開いたVネック","オープンカラー（大きめ）","ダボッとしたタートル"],
+    pattern:["細かいチェック","細いストライプ","小さいドット","ペイズリー"],
+    avoidPattern:["大柄","コントラストが強すぎる柄","太いボーダー"]},
   N:{name:"ナチュラル",col:"#5A4A2A",bcol:"#f4f0e8",
     sil:["オーバーサイズ","ワイド","ロングライン"],
-    mat:["リネン","デニム","レザー","ざっくりニット"],
+    mat:["リネン","デニム","レザー","ざっくりニット（ローゲージ）"],
     items:["ワイドパンツ","オーバーサイズシャツ","ロングコート","セットアップ"],
-    avoid:["タイトすぎる","コンパクトすぎる","ピタッとしたシルエット"]}
+    avoid:["タイトすぎる","深いVネック（鎖骨強調）","ピタッとしたシルエット"],
+    necklines:["ボートネック","タートルネック（ゆったり）","オフタートル","開襟シャツ","バンドカラー"],
+    avoidNeck:["深いVネック（鎖骨・肩幅が目立つ）","ぴったりタートル","スリムフィットクルーネック"],
+    pattern:["大柄チェック","民族柄","ボタニカル（大きめ）","迷彩","太いストライプ"],
+    avoidPattern:["小花柄","細かい総柄","コントラストの弱い柄"]}
 };
 
 const KA={
@@ -776,8 +805,9 @@ function synthesize(k,f,p){
   })();
   return{summary,conflict,silhouette:kd.sil,material:kd.mat,avoid:kd.avoid,
     colors:pd.colors,colorBase:pd.mat,avoidColor:pd.avoid,
-    collar:fd.collar,style:fd.style,acc:fd.acc,
-    metal:pd.metal,items:kd.items};
+    necklines:kd.necklines,avoidNeck:kd.avoidNeck,faceNeck:fd.collar,
+    style:fd.style,acc:fd.acc,metal:pd.metal,
+    pattern:kd.pattern,avoidPattern:kd.avoidPattern,items:kd.items};
 }
 
 let sel={k:null,f:null,p:null},showing=false;
@@ -850,11 +880,19 @@ function renderReport(){
     <div class="color-row">${d.colors.map(c=>`<div class="cswatch"><div class="cdot" style="background:${c.c}"></div><span class="cname">${c.n}</span></div>`).join('')}</div>
     <div style="margin-top:8px"><div class="tags">${d.avoidColor.map(a=>`<span class="tag avoid">${a}</span>`).join('')}</div></div>
     <div class="divider"></div>
-    <div class="sec">似合う衿形・ネックライン</div>
-    <div class="tags">${d.collar.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
+    <div class="sec">似合う衿形（骨格から）</div>
+    <div class="tags">${d.necklines.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
+    <div class="sec">似合う衿形（顔タイプから）</div>
+    <div class="tags">${d.faceNeck.map(n=>`<span class="tag">${n}</span>`).join('')}</div>
+    <div class="sec">避けたい衿形</div>
+    <div class="tags">${d.avoidNeck.map(n=>`<span class="tag avoid">${n}</span>`).join('')}</div>
     <div class="sec">おすすめアイテム</div>
     <div class="tags">${d.items.map(i=>`<span class="tag">${i}</span>`).join('')}</div>
     <div class="divider"></div>
+    <div class="sec">似合う柄（骨格から）</div>
+    <div class="tags">${d.pattern.map(v=>`<span class="tag">${v}</span>`).join('')}</div>
+    <div class="sec">避けたい柄</div>
+    <div class="tags">${d.avoidPattern.map(v=>`<span class="tag avoid">${v}</span>`).join('')}</div>
     <div class="cards2">
       <div class="card"><div class="card-k">似合う金属</div><div class="card-v">${d.metal}</div></div>
       <div class="card"><div class="card-k">アクセサリー</div><div class="card-v">${d.acc}</div></div>
